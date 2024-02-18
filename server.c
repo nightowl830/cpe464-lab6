@@ -15,6 +15,7 @@
 #include "safeUtil.h"
 #include "checksum.h"
 #include "cpe464.h"
+#include "pdu.h"
 
 #define MAXBUF 80
 
@@ -41,7 +42,7 @@ int main ( int argc, char *argv[]  )
 void processClient(int socketNum)
 {
 	int dataLen = 0; 
-	char buffer[MAXBUF + 1];	  
+	char buffer[MAXBUF + 1 + 7];	  
 	struct sockaddr_in6 client;		
 	int clientAddrLen = sizeof(client);	
 	
@@ -52,7 +53,8 @@ void processClient(int socketNum)
 	
 		printf("Received message from client with ");
 		printIPInfo(&client);
-		printf(" Len: %d \'%s\'\n", dataLen, buffer);
+		//printf(" Len: %d \'%s\'\n", dataLen, buffer);
+		printPDU((uint8_t *) buffer, dataLen);
 
 		// just for fun send back to client number of bytes received
 		sprintf(buffer, "bytes: %d", dataLen);

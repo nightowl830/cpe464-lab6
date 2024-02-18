@@ -66,15 +66,15 @@ void talkToServer(int socketNum, struct sockaddr_in6 * server)
 		int len = createPDU(newBuf, seqNum, 3, (uint8_t *) buffer, dataLen);
 		printPDU(newBuf, len);
 		seqNum += 1;
-		printf("SEQ NUM: %d\n", seqNum);
 	
-		safeSendto(socketNum, buffer, dataLen, 0, (struct sockaddr *) server, serverAddrLen);
+		safeSendto(socketNum, newBuf, len, 0, (struct sockaddr *) server, serverAddrLen);
 		
-		safeRecvfrom(socketNum, buffer, MAXBUF, 0, (struct sockaddr *) server, &serverAddrLen);
+		safeRecvfrom(socketNum, newBuf, MAXBUF + 7, 0, (struct sockaddr *) server, &serverAddrLen);
 		
 		// print out bytes received
 		ipString = ipAddressToString(server);
-		printf("Server with ip: %s and port %d said it received %s\n", ipString, ntohs(server->sin6_port), buffer);
+		printf("Server with ip: %s and port %d said it received %s\n",
+			ipString, ntohs(server->sin6_port), newBuf);
 	      
 	}
 }

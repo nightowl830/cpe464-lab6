@@ -18,6 +18,9 @@
 #include "gethostbyname.h"
 #include "networks.h"
 #include "safeUtil.h"
+#include "checksum.h"
+#include "cpe464.h"
+#include "pdu.h"
 
 #define MAXBUF 80
 
@@ -33,8 +36,9 @@ int main (int argc, char *argv[])
 	int portNumber = 0;
 	
 	portNumber = checkArgs(argc, argv);
+	char* errorRate = argv[1];
 	
-	socketNum = setupUdpClientToServer(&server, argv[1], portNumber);
+	socketNum = setupUdpClientToServer(&server, argv[2], portNumber);
 	
 	talkToServer(socketNum, &server);
 	
@@ -50,12 +54,19 @@ void talkToServer(int socketNum, struct sockaddr_in6 * server)
 	int dataLen = 0; 
 	char buffer[MAXBUF+1];
 	
+	uint32_t seqNum = 1;
+
 	buffer[0] = '\0';
 	while (buffer[0] != '.')
 	{
 		dataLen = readFromStdin(buffer);
-
 		printf("Sending: %s with len: %d\n", buffer,dataLen);
+
+		uint8_t newBuf[MAXBUF + 1 + 7];
+		int len = createPDU(newBuf, seqNum, 3, (uint8_t *) buffer, dataLen);
+		printPDU(newBuf, len);
+		seqNum += 1;
+		printf("SEQ NUM: %d\n", seqNum);
 	
 		safeSendto(socketNum, buffer, dataLen, 0, (struct sockaddr *) server, serverAddrLen);
 		
@@ -99,13 +110,13 @@ int checkArgs(int argc, char * argv[])
         int portNumber = 0;
 	
         /* check command line arguments  */
-	if (argc != 3)
+	if (argc != 4)
 	{
-		printf("usage: %s host-name port-number \n", argv[0]);
+		printf("usage: %s error-rate host-name port-number \n", argv[0]);
 		exit(1);
 	}
 	
-	portNumber = atoi(argv[2]);
+	portNumber = atoi(argv[3]);
 		
 	return portNumber;
 }

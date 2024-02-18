@@ -13,6 +13,8 @@
 #include "gethostbyname.h"
 #include "networks.h"
 #include "safeUtil.h"
+#include "checksum.h"
+#include "cpe464.h"
 
 #define MAXBUF 80
 
@@ -25,6 +27,7 @@ int main ( int argc, char *argv[]  )
 	int portNumber = 0;
 
 	portNumber = checkArgs(argc, argv);
+	char* errorRate = argv[1];
 		
 	socketNum = udpServerSetup(portNumber);
 
@@ -63,15 +66,15 @@ int checkArgs(int argc, char *argv[])
 	// Checks args and returns port number
 	int portNumber = 0;
 
-	if (argc > 2)
+	if (argc > 3)
 	{
 		fprintf(stderr, "Usage %s [optional port number]\n", argv[0]);
 		exit(-1);
 	}
 	
-	if (argc == 2)
+	if (argc == 3)
 	{
-		portNumber = atoi(argv[1]);
+		portNumber = atoi(argv[2]);
 	}
 	
 	return portNumber;

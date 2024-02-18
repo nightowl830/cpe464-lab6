@@ -36,8 +36,11 @@ int main (int argc, char *argv[])
 	int portNumber = 0;
 	
 	portNumber = checkArgs(argc, argv);
-	char* errorRate = argv[1];
+	char* ER = argv[1];
+	double errorRate = atof(ER);
 	
+	sendtoErr_init(errorRate, DROP_OFF, FLIP_ON, DEBUG_ON, RSEED_OFF);
+
 	socketNum = setupUdpClientToServer(&server, argv[2], portNumber);
 	
 	talkToServer(socketNum, &server);
@@ -50,7 +53,7 @@ int main (int argc, char *argv[])
 void talkToServer(int socketNum, struct sockaddr_in6 * server)
 {
 	int serverAddrLen = sizeof(struct sockaddr_in6);
-	char * ipString = NULL;
+	//char * ipString = NULL;
 	int dataLen = 0; 
 	char buffer[MAXBUF+1];
 	
@@ -64,17 +67,20 @@ void talkToServer(int socketNum, struct sockaddr_in6 * server)
 
 		uint8_t newBuf[MAXBUF + 1 + 7];
 		int len = createPDU(newBuf, seqNum, 3, (uint8_t *) buffer, dataLen);
-		printPDU(newBuf, len);
+		//printPDU(newBuf, len);
 		seqNum += 1;
 	
 		safeSendto(socketNum, newBuf, len, 0, (struct sockaddr *) server, serverAddrLen);
 		
-		safeRecvfrom(socketNum, newBuf, MAXBUF + 7, 0, (struct sockaddr *) server, &serverAddrLen);
+		int recvLen = safeRecvfrom(socketNum, newBuf, MAXBUF + 7 + 1, 0, (struct sockaddr *) server, &serverAddrLen);
 		
-		// print out bytes received
-		ipString = ipAddressToString(server);
-		printf("Server with ip: %s and port %d said it received %s\n",
-			ipString, ntohs(server->sin6_port), newBuf);
+		// print out bytes received and other pdu info
+		printPDU(newBuf, recvLen);
+		
+
+		// ipString = ipAddressToString(server);
+		// printf("Server with ip: %s and port %d said it received %s\n",
+		// 	ipString, ntohs(server->sin6_port), dataPtr);
 	      
 	}
 }

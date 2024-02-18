@@ -31,21 +31,23 @@ int createPDU(uint8_t* pduBuffer, uint32_t sequenceNumber, uint8_t flag, uint8_t
 void printPDU(uint8_t* aPDU, int pduLength) {
     uint16_t checksum = in_cksum((unsigned short *) aPDU, pduLength); //calculate checksum
     if (checksum != 0) {
-        printf("Corrupted PDU\n");
+        printf("\n\t---------------Corrupted PDU---------------\n");
     }
 
     //print rest of data
     uint32_t networkOrderSequenceNumber = 0;
     memcpy(&networkOrderSequenceNumber, aPDU, 4);
     uint32_t hostOrderSequenceNumber = ntohl(networkOrderSequenceNumber);
+    uint16_t checksumToPrint = 0;
+    memcpy(&checksumToPrint, aPDU + 4, 2);
     uint8_t flag = 0;
     memcpy(&flag, aPDU + 6, 1);
     uint8_t data[pduLength - 7];
     memset(data, 0, pduLength - 7);
     memcpy(data, aPDU + 7, pduLength - 7);
 
-    printf("Sequence Number: %d\nFlag: %d\nData Length: %d\nData: %s\n",
-        hostOrderSequenceNumber, flag, pduLength - 7, data);
+    printf("\tSequence Number: %d\n\tChecksum: 0x%x\n\tFlag: %d\n\tData Length: %d\n\tData: %s\n",
+        hostOrderSequenceNumber, checksumToPrint, flag, pduLength - 7, data);
 
     return;
 }

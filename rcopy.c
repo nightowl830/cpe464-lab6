@@ -39,7 +39,7 @@ int main (int argc, char *argv[])
 	char* ER = argv[1];
 	double errorRate = atof(ER);
 	
-	sendtoErr_init(errorRate, DROP_OFF, FLIP_ON, DEBUG_ON, RSEED_OFF);
+	sendtoErr_init(errorRate, DROP_ON, FLIP_ON, DEBUG_ON, RSEED_OFF);
 
 	socketNum = setupUdpClientToServer(&server, argv[2], portNumber);
 	
